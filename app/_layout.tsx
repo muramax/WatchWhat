@@ -1,39 +1,36 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { View, Text } from 'react-native'
+import React, { useEffect } from 'react'
+import { Slot, useRouter, useSegments } from 'expo-router'
+import "../global.css"
+import { AuthContextProvider, useAuth } from '../context/authContext'
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+const MainLayout = () => {
+  const {isAuthenticated} = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    // Check if the user is authenticated
+    if(typeof isAuthenticated == 'undefined') return;
+    const inApp = segments[0] == '(app)';
+    if(isAuthenticated && !inApp) {
+      // Redirect to home
+      router.replace('/home');
+    }else if(isAuthenticated == false) {
+      // Redirect to signin page
+      router.replace('/signIn');
     }
-  }, [loaded]);
+  }, [isAuthenticated])
 
-  if (!loaded) {
-    return null;
-  }
+  return <Slot />
+}
 
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <AuthContextProvider>
+      <MainLayout> 
+
+      </MainLayout>
+    </AuthContextProvider>
+  )
 }
