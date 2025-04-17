@@ -3,11 +3,19 @@ import { createContext, useEffect, useState } from "react";
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
+import { getIdToken as getFirebaseIdToken } from "firebase/auth";
 
 export const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(undefined);
+
+    const getIdToken = async () => {
+        if (auth.currentUser) {
+          return await getFirebaseIdToken(auth.currentUser, true);
+        }
+        return null;
+    };
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
@@ -74,7 +82,7 @@ export const AuthContextProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, register }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, register, getIdToken }}>
             {children}
         </AuthContext.Provider>
     )

@@ -3,23 +3,60 @@ import React, {useRef, useState} from 'react'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons, Octicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import Loading from '@/components/Loading';
 import CustomKeyboardView from '@/components/CustomKeyboardView';
 import { Picker } from '@react-native-picker/picker';
+import { useAuth } from '@/context/authContext';
+
 
 
 export default function home() {
-
-  const router = useRouter();
+  const { getIdToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const nameRef = useRef("");
   const genreRef = useRef("");
   const [selectedStatus, setSelectedStatus] = useState(undefined);
 
   const handleAdd = async () => {
+    setLoading(true);
+  
+    const name = nameRef.current;
+    const genre = genreRef.current;
+    const status = selectedStatus;
+  
+    try {
+      const idToken = await getIdToken();
 
-  }
+      const response = await fetch('https://c6d4-161-200-190-28.ngrok-free.app/add_movie', {
+        method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id_token: idToken,
+          name,
+          genre,
+          status,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert('Movie added successfully!');
+      } else {
+        console.log('Error response:', data);
+        alert('Failed to add movie!');
+      }
+  
+    } catch (error) {
+      console.error('Fetch error:', error);
+      alert('An error occurred while adding the movie.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <CustomKeyboardView>
