@@ -9,25 +9,32 @@ import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '@/context/authContext';
 
 
-
 export default function home() {
   const { getIdToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const nameRef = useRef("");
-  const genreRef = useRef("");
-  const [selectedStatus, setSelectedStatus] = useState(undefined);
+  const [selectedGenre, setSelectedGenre] = useState("Action");
+  const [selectedStatus, setSelectedStatus] = useState("watching");
+
+  const genres = [
+    "Action", "Adventure", "Animation", "Comedy", "Drama", "Fantasy", "Horror", 
+    "Mystery", "Romance", "Sci-Fi", "Thriller", "Crime", "Documentary", "Historical", 
+    "Musical", "Family", "Biography", "War", "Western", "Superhero", "Sports", 
+    "Reality", "Game Show", "True Crime", "Psychological", "Zombie/Apocalypse"
+  ];
 
   const handleAdd = async () => {
     setLoading(true);
   
     const name = nameRef.current;
-    const genre = genreRef.current;
+    const genre = selectedGenre;
     const status = selectedStatus;
-  
+    const NGROK_URL = 'https://6b81-2001-fb1-22-b3a1-ad09-4a6-569a-c36.ngrok-free.app'; // Replace everytime when run backend
+
     try {
       const idToken = await getIdToken();
 
-      const response = await fetch('https://c6d4-161-200-190-28.ngrok-free.app/add_movie', {
+      const response = await fetch(`${NGROK_URL}/add_movie`, {
         method: 'POST',
         headers: {
           'ngrok-skip-browser-warning': 'true',
@@ -52,48 +59,54 @@ export default function home() {
   
     } catch (error) {
       console.error('Fetch error:', error);
-      alert('An error occurred while adding the movie.');
+      alert(`An error occurred while adding the movie`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <CustomKeyboardView>
+    <CustomKeyboardView >
       <StatusBar style="dark"/>
-      <View className='pt-4 px-5 flex-1 gap-3'>
+      <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl'>
         <View>
-          <Text className='text-left text-2xl font-bold'>Add</Text>
+          <Text className='text-left text-2xl font-bold text-white'>Add</Text>
         </View>
 
         <View className='gap-5'>
           <View className='gap-3 px-4'>
-            <View style={{height: hp(6)}} className="flex-row justify-between gap-2"> 
-              
-              <View className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
-                <MaterialIcons name="movie" size={hp(3)} color="gray" />
-                <TextInput 
-                  onChangeText={value => nameRef.current = value} 
-                  style={{fontSize: hp(1.8)}} 
-                  className='ml-2 flex-1 font-semibold text-neutral-700' 
-                  placeholder='Movie/Series' 
-                  placeholderTextColor={'gray'} 
-                />
-              </View>
-              <View className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
-                <MaterialIcons name="style" size={hp(3)} color="gray" />
-                <TextInput 
-                  onChangeText={value => genreRef.current = value} 
-                  style={{fontSize: hp(1.8)}} 
-                  className='ml-2 flex-1 font-semibold text-neutral-700' 
-                  placeholder='Genre (only 1)' 
-                  placeholderTextColor={'gray'} 
-                />
-              </View>
+            <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+              <MaterialIcons name="movie" size={hp(3)} color="gray" />
+              <TextInput 
+                onChangeText={value => nameRef.current = value} 
+                style={{fontSize: hp(1.8)}} 
+                className='ml-4 flex-1 font-semibold text-neutral-700' 
+                placeholder='Movie/Series' 
+                placeholderTextColor={'gray'} 
+              />
             </View>
+            <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+              <MaterialIcons name="style" size={hp(3)} color="gray" />
+              <Picker
+                selectedValue={selectedGenre}
+                onValueChange={(itemValue) => setSelectedGenre(itemValue)}
+                style={{
+                  flex: 1,
+                  marginLeft: 3,
+                  fontSize: hp(1.8),
+                  color: '#404040',
+                }}
+                dropdownIconColor="gray"
+              >
+                {genres.map((genre) => (
+                  <Picker.Item key={genre} label={genre} value={genre} />
+                ))}
+              </Picker>
+            </View>
+            
 
             <View style={{ height: hp(5) }} className="flex-row items-center justify-between gap-2 ">
-              <Text className="font-semibold text-base text-neutral-700">
+              <Text className="font-bold text-lg text-white">
                 Select Status:
               </Text>
 
@@ -104,7 +117,7 @@ export default function home() {
                   onValueChange={(itemValue) => setSelectedStatus(itemValue)}
                   style={{
                     flex: 1,
-                    marginLeft: 10,
+                    marginLeft: 3,
                     fontSize: 16,
                     fontWeight: '600',
                     color: '#404040',
@@ -120,12 +133,12 @@ export default function home() {
 
             <View>
               {
-                loading?(
+                loading ? (
                   <View className='flex-row justify-center'>
                     <Loading size={hp(8)} />
                   </View>
-                ):(
-                  <TouchableOpacity onPress={handleAdd} style={{height :hp(3.5)}} className='bg-indigo-400 rounded-xl justify-center items-center'>
+                ) : (
+                  <TouchableOpacity onPress={handleAdd} style={{height: hp(4)}} className='bg-indigo-400 rounded-xl justify-center items-center'>
                     <Text style={{fontSize: hp(2)}} className='text-white font-semibold tracking-wider'>
                       Add!
                     </Text>
@@ -134,6 +147,18 @@ export default function home() {
               }
             </View>
           </View>
+        </View>
+      </View>
+
+      <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl'>
+        <View>
+          <Text className='text-left text-2xl font-bold text-white'>Update</Text>
+        </View>
+      </View>
+
+      <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl'>
+        <View>
+          <Text className='text-left text-2xl font-bold text-white'>Delete</Text>
         </View>
       </View>
     </CustomKeyboardView>

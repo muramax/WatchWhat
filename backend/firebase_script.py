@@ -26,7 +26,7 @@ def verify_id_token(id_token):
 
 def add_movies_series(name, genre, status, token):
     userId = token['uid']
-    doc_ref = movies_series_collection.document(userId)
+    doc_ref = movies_series_collection.document(userId).collection("user_movies_series").document()
     doc_ref.set({
         "name": name,
         "genre": genre,
@@ -49,13 +49,10 @@ def add_movie():
     # If token is valid, add the movie
     add_movies_series(name, genre, status, decoded_token)
     return jsonify({"message": "Movie added successfully"}), 200
-
+        
 # Start Flask app with ngrok tunnel
 if __name__ == '__main__':
     public_url = ngrok.connect(5000)
     print(f" * ngrok tunnel \"{public_url}\" -> http://127.0.0.1:5000")
-    
-    with open("backend/.env", "w") as f:
-        f.write(f"NGROK_URL={public_url}\n")
         
     app.run(port=5000)
