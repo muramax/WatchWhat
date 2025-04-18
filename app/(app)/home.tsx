@@ -1,5 +1,5 @@
 import { View, Text, Image, TextInput, TouchableOpacity, Pressable } from 'react-native'
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons, Octicons } from '@expo/vector-icons';
@@ -13,15 +13,17 @@ export default function home() {
   const { getIdToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const nameRef = useRef("");
+  const [selectedMoviesSeries, setSelectedMoviesSeries] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("Action");
   const [selectedStatus, setSelectedStatus] = useState("watching");
-
+  const NGROK_URL = 'https://6148-1-46-143-38.ngrok-free.app'; // Replace everytime when run backend
   const genres = [
     "Action", "Adventure", "Animation", "Comedy", "Drama", "Fantasy", "Horror", 
     "Mystery", "Romance", "Sci-Fi", "Thriller", "Crime", "Documentary", "Historical", 
     "Musical", "Family", "Biography", "War", "Western", "Superhero", "Sports", 
     "Reality", "Game Show", "True Crime", "Psychological", "Zombie/Apocalypse"
   ];
+  const [moviesSeries, setMoviesSeries] = useState([]); // useState instead of const movies_series = []
 
   const handleAdd = async () => {
     setLoading(true);
@@ -29,7 +31,6 @@ export default function home() {
     const name = nameRef.current;
     const genre = selectedGenre;
     const status = selectedStatus;
-    const NGROK_URL = 'https://6b81-2001-fb1-22-b3a1-ad09-4a6-569a-c36.ngrok-free.app'; // Replace everytime when run backend
 
     try {
       const idToken = await getIdToken();
@@ -52,6 +53,7 @@ export default function home() {
   
       if (response.ok) {
         alert('Movie added successfully!');
+        getAllMoviesSeries();
       } else {
         console.log('Error response:', data);
         alert('Failed to add movie!');
@@ -64,6 +66,48 @@ export default function home() {
       setLoading(false);
     }
   };
+
+  const getAllMoviesSeries = async () => {
+    setLoading(true);
+
+    try {
+      const idToken = await getIdToken();
+
+      const response = await fetch(`${NGROK_URL}/get_all_movies_series`, {
+        method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id_token: idToken,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log('Movies:', data);
+        setMoviesSeries(data.movies_series);
+      } else {
+        console.log('Error response:', data);
+      }
+  
+    } catch (error) {
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleUpdate = async () => {
+    
+
+  }
+
+  useEffect(() => {
+    getAllMoviesSeries();
+  }, []);
 
   return (
     <CustomKeyboardView >
@@ -154,6 +198,24 @@ export default function home() {
         <View>
           <Text className='text-left text-2xl font-bold text-white'>Update</Text>
         </View>
+        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+              <MaterialIcons name="movie" size={hp(3)} color="gray" />
+              <Picker
+                selectedValue={selectedMoviesSeries}
+                onValueChange={(itemValue) => setSelectedMoviesSeries(itemValue)}
+                style={{
+                  flex: 1,
+                  marginLeft: 3,
+                  fontSize: hp(1.8),
+                  color: '#404040',
+                }}
+                dropdownIconColor="gray"
+              >
+                {moviesSeries.map((ms) => (
+                  <Picker.Item key={ms} label={ms} value={ms} />
+                ))}
+              </Picker>
+            </View>
       </View>
 
       <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl'>

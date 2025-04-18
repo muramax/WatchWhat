@@ -50,9 +50,51 @@ def add_movie():
     add_movies_series(name, genre, status, decoded_token)
     return jsonify({"message": "Movie added successfully"}), 200
         
+@app.route('/get_all_movies_series', methods=['POST'])
+def get_all_movies_series():
+    data = request.json
+    id_token = data.get('id_token')
+    decoded_token = verify_id_token(id_token)
+    userId = decoded_token['uid']
+    docs = movies_series_collection.document(userId).collection("user_movies_series").stream()
+    movie_names = []
+    for doc in docs:
+        data = doc.to_dict()
+        if 'name' in data:
+            movie_names.append(data['name'])
+            
+    return jsonify({"movies_series": movie_names}), 200
+
+@app.route('/update_movies_series', methods=['UPDATE'])
+def update_movies_series():
+    data = request.json
+    id_token = data.get('id_token')
+    name = data.get('name')
+    genre = data.get('genre')
+    status = data.get('status')
+
+    # Verify the ID token
+    decoded_token = verify_id_token(id_token)
+    if not decoded_token:
+        return jsonify({"message": "Invalid or expired ID token"}), 401
+
+    # If token is valid, update the movie
+    userId = decoded_token['uid']
+    doc_ref = movies_series_collection.document(userId).collection("user_movies_series").document(name)
+    doc_ref.update({
+        "name": name,
+        "genre": genre,
+        "status": status
+    })
+    
+    return jsonify({"message": "Movie updated successfully"}), 200
+
+
 # Start Flask app with ngrok tunnel
 if __name__ == '__main__':
     public_url = ngrok.connect(5000)
     print(f" * ngrok tunnel \"{public_url}\" -> http://127.0.0.1:5000")
         
     app.run(port=5000)
+    
+    
