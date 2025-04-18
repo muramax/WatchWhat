@@ -13,17 +13,20 @@ export default function home() {
   const { getIdToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const nameRef = useRef("");
-  const [selectedMoviesSeries, setSelectedMoviesSeries] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("Action");
-  const [selectedStatus, setSelectedStatus] = useState("watching");
-  const NGROK_URL = 'https://6148-1-46-143-38.ngrok-free.app'; // Replace everytime when run backend
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [updatedMoviesSeries, setUpdatedMoviesSeries] = useState("");
+  const [updatedGenre, setUpdatedGenre] = useState("");
+  const [updatedStatus, setUpdatedStatus] = useState("");
+  const [moviesSeries, setMoviesSeries] = useState([]);
+  const NGROK_URL = 'https://54dd-2001-fb1-22-b6cb-30cb-2696-8073-ccf4.ngrok-free.app'; // Replace everytime when run backend
   const genres = [
     "Action", "Adventure", "Animation", "Comedy", "Drama", "Fantasy", "Horror", 
     "Mystery", "Romance", "Sci-Fi", "Thriller", "Crime", "Documentary", "Historical", 
     "Musical", "Family", "Biography", "War", "Western", "Superhero", "Sports", 
     "Reality", "Game Show", "True Crime", "Psychological", "Zombie/Apocalypse"
   ];
-  const [moviesSeries, setMoviesSeries] = useState([]); // useState instead of const movies_series = []
+  
 
   const handleAdd = async () => {
     setLoading(true);
@@ -31,10 +34,28 @@ export default function home() {
     const name = nameRef.current;
     const genre = selectedGenre;
     const status = selectedStatus;
+  
+    if (!name || name.trim() === "") {
+      alert("Movie/Series name cannot be empty!");
+      setLoading(false);
+      return; // Early return to stop the function execution
+    }
 
+    if (!genre || genre.trim() === "") {
+      alert("Genre cannot be empty!");
+      setLoading(false);
+      return; // Early return to stop the function execution
+    }
+
+    if (!status || status.trim() === "") {
+      alert("Status name cannot be empty!");
+      setLoading(false);
+      return; // Early return to stop the function execution
+    }
+  
     try {
       const idToken = await getIdToken();
-
+  
       const response = await fetch(`${NGROK_URL}/add_movie`, {
         method: 'POST',
         headers: {
@@ -69,18 +90,18 @@ export default function home() {
 
   const getAllMoviesSeries = async () => {
     setLoading(true);
-
+  
     try {
       const idToken = await getIdToken();
-
+  
       const response = await fetch(`${NGROK_URL}/get_all_movies_series`, {
         method: 'POST',
         headers: {
-          'ngrok-skip-browser-warning': 'true',
-          'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id_token: idToken,
+            id_token: idToken,  // Make sure idToken is valid here
         }),
       });
   
@@ -98,10 +119,58 @@ export default function home() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleUpdate = async () => {
-    
+    setLoading(true);
+
+    const name = updatedMoviesSeries;
+    const genre = updatedGenre;
+    const status = updatedStatus;
+
+    if (!name || name.trim() === "") {
+      alert("Movie/Series name cannot be empty!");
+      setLoading(false);
+      return; // Early return to stop the function execution
+    }
+
+    if ((!genre || genre.trim() === "") && (!status || status.trim() === "")) {
+      alert("Please provide at least a genre or a status to update.");
+      setLoading(false);
+      return;
+    }
+
+    try{
+      const idToken = await getIdToken();
+
+      const response = await fetch(`${NGROK_URL}/get_all_movies_series`, {
+        method: 'UPDATE',
+        headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id_token: idToken,  // Make sure idToken is valid here
+            name,
+            genre,
+            status,
+        }),
+      });
+
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert('Movie updated successfully!');
+        setMoviesSeries(data.movies_series);
+      } else {
+        console.log('Error response:', data);
+      }
+
+    }catch (error) {
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
 
   }
 
@@ -124,8 +193,8 @@ export default function home() {
               <TextInput 
                 onChangeText={value => nameRef.current = value} 
                 style={{fontSize: hp(1.8)}} 
-                className='ml-4 flex-1 font-semibold text-neutral-700' 
-                placeholder='Movie/Series' 
+                className='ml-4 flex-1 font-semibold text-black' 
+                placeholder='Add Movie/Series' 
                 placeholderTextColor={'gray'} 
               />
             </View>
@@ -142,6 +211,7 @@ export default function home() {
                 }}
                 dropdownIconColor="gray"
               >
+                <Picker.Item label="Select Genre" value="" color="gray" />
                 {genres.map((genre) => (
                   <Picker.Item key={genre} label={genre} value={genre} />
                 ))}
@@ -149,12 +219,9 @@ export default function home() {
             </View>
             
 
-            <View style={{ height: hp(5) }} className="flex-row items-center justify-between gap-2 ">
-              <Text className="font-bold text-lg text-white">
-                Select Status:
-              </Text>
+              
 
-              <View style={{height: hp(5)}} className="flex-row items-center bg-neutral-200 rounded-2xl px-3 py-1 flex-1 ml-2">
+            <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
                 <Octicons name="checklist" size={hp(3)} color="gray" />
                 <Picker
                   selectedValue={selectedStatus}
@@ -168,12 +235,13 @@ export default function home() {
                   }}
                   dropdownIconColor="gray"
                 >
+                  <Picker.Item label="Select Status" value="" color="gray" />
                   <Picker.Item label="Watching" value="Watching" />
                   <Picker.Item label="Planning" value="Planning" />
                   <Picker.Item label="Completed" value="Completed" />
                 </Picker>
               </View>
-            </View>
+        
 
             <View>
               {
@@ -198,26 +266,87 @@ export default function home() {
         <View>
           <Text className='text-left text-2xl font-bold text-white'>Update</Text>
         </View>
-        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
-              <MaterialIcons name="movie" size={hp(3)} color="gray" />
-              <Picker
-                selectedValue={selectedMoviesSeries}
-                onValueChange={(itemValue) => setSelectedMoviesSeries(itemValue)}
-                style={{
-                  flex: 1,
-                  marginLeft: 3,
-                  fontSize: hp(1.8),
-                  color: '#404040',
-                }}
-                dropdownIconColor="gray"
-              >
-                {moviesSeries.map((ms) => (
-                  <Picker.Item key={ms} label={ms} value={ms} />
-                ))}
-              </Picker>
-            </View>
-      </View>
 
+        <View className='gap-5'>
+        <View className='gap-3 px-4'>
+        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+          <MaterialIcons name="movie" size={hp(3)} color="gray" />
+          <Picker
+            selectedValue={updatedMoviesSeries}
+            onValueChange={(itemValue) => setUpdatedMoviesSeries(itemValue)}
+            style={{
+              flex: 1,
+              marginLeft: 3,
+              fontSize: hp(1.8),
+              color: '#404040',
+            }}
+            dropdownIconColor="gray"
+          >
+            <Picker.Item label="Select Movie/Series" value="" color="gray" />
+            {moviesSeries.map((ms) => (
+              <Picker.Item key={ms} label={ms} value={ms} />
+            ))}
+          </Picker>
+        </View>
+        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+          <MaterialIcons name="style" size={hp(3)} color="gray" />
+          <Picker
+            selectedValue={updatedGenre}
+            onValueChange={(itemValue) => setUpdatedGenre(itemValue)}
+            style={{
+              flex: 1,
+              marginLeft: 3,
+              fontSize: hp(1.8),
+              color: '#404040',
+            }}
+            dropdownIconColor="gray"
+          >
+          <Picker.Item label="Select Genre" value="" color="gray" />
+          {genres.map((genre) => (
+            <Picker.Item key={genre} label={genre} value={genre} />
+          ))}
+          </Picker>
+        </View>
+
+        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+          <Octicons name="checklist" size={hp(3)} color="gray" />
+            <Picker
+              selectedValue={updatedStatus}
+              onValueChange={(itemValue) => setUpdatedStatus(itemValue)}
+              style={{
+                flex: 1,
+                marginLeft: 3,
+                fontSize: 16,
+                fontWeight: '600',
+                color: '#404040',
+              }}
+              dropdownIconColor="gray"
+            >
+              <Picker.Item label="Select Status" value="" color="gray" />
+              <Picker.Item label="Watching" value="Watching" />
+              <Picker.Item label="Planning" value="Planning" />
+              <Picker.Item label="Completed" value="Completed" />
+            </Picker>
+        </View>
+
+        <View>
+              {
+                loading ? (
+                  <View className='flex-row justify-center'>
+                    <Loading size={hp(8)} />
+                  </View>
+                ) : (
+                  <TouchableOpacity onPress={handleUpdate} style={{height: hp(4)}} className='bg-indigo-400 rounded-xl justify-center items-center'>
+                    <Text style={{fontSize: hp(2)}} className='text-white font-semibold tracking-wider'>
+                      Update!
+                    </Text>
+                  </TouchableOpacity>
+                )
+              }
+        </View>
+        </View>
+        </View>
+      </View>
       <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl'>
         <View>
           <Text className='text-left text-2xl font-bold text-white'>Delete</Text>

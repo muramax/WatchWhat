@@ -55,6 +55,8 @@ def get_all_movies_series():
     data = request.json
     id_token = data.get('id_token')
     decoded_token = verify_id_token(id_token)
+    if not decoded_token:
+        return jsonify({"message": "Invalid or expired ID token"}), 401
     userId = decoded_token['uid']
     docs = movies_series_collection.document(userId).collection("user_movies_series").stream()
     movie_names = []
@@ -78,14 +80,16 @@ def update_movies_series():
     if not decoded_token:
         return jsonify({"message": "Invalid or expired ID token"}), 401
 
+    update_fields = {}
+    if genre and genre.strip() != "":
+        update_fields["genre"] = genre
+    if status and status.strip() != "":
+        update_fields["status"] = status
+    
     # If token is valid, update the movie
     userId = decoded_token['uid']
     doc_ref = movies_series_collection.document(userId).collection("user_movies_series").document(name)
-    doc_ref.update({
-        "name": name,
-        "genre": genre,
-        "status": status
-    })
+    doc_ref.update(update_fields)
     
     return jsonify({"message": "Movie updated successfully"}), 200
 
