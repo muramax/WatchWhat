@@ -19,7 +19,7 @@ export default function home() {
   const [updatedGenre, setUpdatedGenre] = useState("");
   const [updatedStatus, setUpdatedStatus] = useState("");
   const [moviesSeries, setMoviesSeries] = useState([]);
-  const NGROK_URL = 'https://54dd-2001-fb1-22-b6cb-30cb-2696-8073-ccf4.ngrok-free.app'; // Replace everytime when run backend
+  const NGROK_URL = 'https://a30a-34-23-248-16.ngrok-free.app'; // Replace everytime when run backend
   const genres = [
     "Action", "Adventure", "Animation", "Comedy", "Drama", "Fantasy", "Horror", 
     "Mystery", "Romance", "Sci-Fi", "Thriller", "Crime", "Documentary", "Historical", 
@@ -55,6 +55,7 @@ export default function home() {
   
     try {
       const idToken = await getIdToken();
+      console.log("Sending ID Token:", idToken);
   
       const response = await fetch(`${NGROK_URL}/add_movie`, {
         method: 'POST',
@@ -69,7 +70,6 @@ export default function home() {
           status,
         }),
       });
-  
       const data = await response.json();
   
       if (response.ok) {
@@ -124,17 +124,17 @@ export default function home() {
   const handleUpdate = async () => {
     setLoading(true);
 
-    const name = updatedMoviesSeries;
-    const genre = updatedGenre;
-    const status = updatedStatus;
+    const nameu = updatedMoviesSeries;
+    const genreu = updatedGenre;
+    const statusu = updatedStatus;
 
-    if (!name || name.trim() === "") {
+    if (!nameu || nameu.trim() === "") {
       alert("Movie/Series name cannot be empty!");
       setLoading(false);
       return; // Early return to stop the function execution
     }
 
-    if ((!genre || genre.trim() === "") && (!status || status.trim() === "")) {
+    if ((!genreu || genreu.trim() === "") && (!statusu || statusu.trim() === "")) {
       alert("Please provide at least a genre or a status to update.");
       setLoading(false);
       return;
@@ -143,28 +143,35 @@ export default function home() {
     try{
       const idToken = await getIdToken();
 
-      const response = await fetch(`${NGROK_URL}/get_all_movies_series`, {
-        method: 'UPDATE',
+      const response = await fetch(`${NGROK_URL}/change_movies_series`, {
+        method: 'POST',
         headers: {
             'ngrok-skip-browser-warning': 'true',
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             id_token: idToken,  // Make sure idToken is valid here
-            name,
-            genre,
-            status,
+            nameu,
+            genreu,
+            statusu,
         }),
       });
 
-      const data = await response.json();
-  
-      if (response.ok) {
-        alert('Movie updated successfully!');
-        setMoviesSeries(data.movies_series);
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        if (response.ok) {
+          alert('Movie updated successfully!');
+          getAllMoviesSeries();
+        } else {
+          console.log('Error response:', data);
+        }
       } else {
-        console.log('Error response:', data);
+        const text = await response.text(); // Read HTML/plain text error
+        console.warn("Non-JSON response received:", text);
+        alert("Something went wrong. Check the console for details.");
       }
+      
 
     }catch (error) {
       console.error('Fetch error:', error);
