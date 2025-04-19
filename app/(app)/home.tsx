@@ -2,7 +2,7 @@ import { View, Text, Image, TextInput, TouchableOpacity, Pressable } from 'react
 import React, {useEffect, useRef, useState} from 'react'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { StatusBar } from 'expo-status-bar';
-import { MaterialIcons, Octicons } from '@expo/vector-icons';
+import { Feather, MaterialIcons, Octicons } from '@expo/vector-icons';
 import Loading from '@/components/Loading';
 import CustomKeyboardView from '@/components/CustomKeyboardView';
 import { Picker } from '@react-native-picker/picker';
@@ -18,8 +18,10 @@ export default function home() {
   const [updatedMoviesSeries, setUpdatedMoviesSeries] = useState("");
   const [updatedGenre, setUpdatedGenre] = useState("");
   const [updatedStatus, setUpdatedStatus] = useState("");
+  const [deletedMoviesSeries, setDeletedMoviesSeries] = useState("");
+  const [confirmation, setConfirmation] = useState("");
   const [moviesSeries, setMoviesSeries] = useState([]);
-  const NGROK_URL = 'https://a30a-34-23-248-16.ngrok-free.app'; // Replace everytime when run backend
+  const NGROK_URL = 'https://721f-34-139-222-174.ngrok-free.app/'; // Replace everytime when run backend
   const genres = [
     "Action", "Adventure", "Animation", "Comedy", "Drama", "Fantasy", "Horror", 
     "Mystery", "Romance", "Sci-Fi", "Thriller", "Crime", "Documentary", "Historical", 
@@ -74,10 +76,13 @@ export default function home() {
   
       if (response.ok) {
         alert('Movie added successfully!');
+        nameRef.current = ""; // Clear the input field after successful addition
+        setSelectedGenre(""); // Reset the selected genre
+        setSelectedStatus(""); // Reset the selected status
         getAllMoviesSeries();
       } else {
         console.log('Error response:', data);
-        alert('Failed to add movie!');
+        alert('Failed to add movie!, ' + data.message);
       }
   
     } catch (error) {
@@ -143,8 +148,8 @@ export default function home() {
     try{
       const idToken = await getIdToken();
 
-      const response = await fetch(`${NGROK_URL}/change_movies_series`, {
-        method: 'POST',
+      const response = await fetch(`${NGROK_URL}/update_movies_series`, {
+        method: 'PATCH',
         headers: {
             'ngrok-skip-browser-warning': 'true',
             'Content-Type': 'application/json',
@@ -157,20 +162,16 @@ export default function home() {
         }),
       });
 
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         if (response.ok) {
           alert('Movie updated successfully!');
           getAllMoviesSeries();
+          setUpdatedMoviesSeries(""); // Clear the input field after successful addition
+          setUpdatedGenre(""); // Reset the selected genre
         } else {
           console.log('Error response:', data);
         }
-      } else {
-        const text = await response.text(); // Read HTML/plain text error
-        console.warn("Non-JSON response received:", text);
-        alert("Something went wrong. Check the console for details.");
-      }
+      
       
 
     }catch (error) {
@@ -179,6 +180,91 @@ export default function home() {
       setLoading(false);
     }
 
+  }
+
+  const handleDelete = async () => {
+    setLoading(true);
+
+    const named = deletedMoviesSeries;
+
+    if (!named || named.trim() === "") {
+      alert("Movie/Series name cannot be empty!");
+      setLoading(false);
+      return; // Early return to stop the function execution
+    }
+
+    try{
+      const idToken = await getIdToken();
+
+      const response = await fetch(`${NGROK_URL}/delete_movies_series`, {
+        method: 'DELETE',
+        headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id_token: idToken,  // Make sure idToken is valid here
+            named,
+        }),
+      });
+
+      
+        const data = await response.json();
+        if (response.ok) {
+          alert('Movie Deleted successfully!');
+          getAllMoviesSeries();
+          setDeletedMoviesSeries(""); // Clear the input field after successful addition
+        } else {
+          console.log('Error response:', data);
+        }
+
+    }catch (error) {
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleDeleteAll = async () => {
+    setLoading(true);
+
+    const confirm = confirmation;
+
+    if (!confirm || confirm.trim() === "") {
+      alert("Please confirm to delete all movies/series!");
+      setLoading(false);
+      return;
+    }
+
+    try{
+      const idToken = await getIdToken();
+
+      const response = await fetch(`${NGROK_URL}/delete_all_movies_series`, {
+        method: 'DELETE',
+        headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id_token: idToken,  // Make sure idToken is valid here
+        }),
+      });
+
+      
+        const data = await response.json();
+        if (response.ok) {
+          alert('Movie Deleted ALL successfully!');
+          getAllMoviesSeries();
+          setConfirmation(""); // Clear the input field after successful addition
+        } else {
+          console.log('Error response:', data);
+        }
+
+    }catch (error) {
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -354,9 +440,94 @@ export default function home() {
         </View>
         </View>
       </View>
+
       <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl'>
         <View>
           <Text className='text-left text-2xl font-bold text-white'>Delete</Text>
+        </View>
+
+        <View className='gap-5'>
+        <View className='gap-3 px-4'>
+        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+          <MaterialIcons name="movie" size={hp(3)} color="gray" />
+          <Picker
+            selectedValue={deletedMoviesSeries}
+            onValueChange={(itemValue) => setDeletedMoviesSeries(itemValue)}
+            style={{
+              flex: 1,
+              marginLeft: 3,
+              fontSize: hp(1.8),
+              color: '#404040',
+            }}
+            dropdownIconColor="gray"
+          >
+            <Picker.Item label="Select Movie/Series" value="" color="gray" />
+            {moviesSeries.map((ms) => (
+              <Picker.Item key={ms} label={ms} value={ms} />
+            ))}
+          </Picker>
+        </View>
+        
+        <View>
+              {
+                loading ? (
+                  <View className='flex-row justify-center'>
+                    <Loading size={hp(8)} />
+                  </View>
+                ) : (
+                  <TouchableOpacity onPress={handleDelete} style={{height: hp(4)}} className='bg-indigo-400 rounded-xl justify-center items-center'>
+                    <Text style={{fontSize: hp(2)}} className='text-white font-semibold tracking-wider'>
+                      Delete!
+                    </Text>
+                  </TouchableOpacity>
+                )
+              }
+        </View>
+        </View>
+        </View>
+      </View>
+
+      <View className='mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-red-900 rounded-2xl'>
+        <View>
+          <Text className='text-left text-2xl font-bold text-white'>Delete ALL!!!</Text>
+        </View>
+
+        <View className='gap-5'>
+        <View className='gap-3 px-4'>
+        <View style={{ height: hp(6) }} className="flex-1 flex-row items-center bg-neutral-200 px-3 py-2 rounded-2xl"> 
+          <Feather name="check-circle" size={hp(3)} color="gray" />
+          <Picker
+            selectedValue={confirmation}
+            onValueChange={(itemValue) => setConfirmation(itemValue)}
+            style={{
+              flex: 1,
+              marginLeft: 3,
+              fontSize: hp(1.8),
+              color: '#404040',
+            }}
+            dropdownIconColor="gray"
+          >
+            <Picker.Item label="Confirm?" value="" color="gray" />
+            <Picker.Item key={"YES"} label={"YES"} value={"YES"} />
+          </Picker>
+        </View>
+        
+        <View>
+              {
+                loading ? (
+                  <View className='flex-row justify-center'>
+                    <Loading size={hp(8)} />
+                  </View>
+                ) : (
+                  <TouchableOpacity onPress={handleDeleteAll} style={{height: hp(4)}} className='bg-indigo-400 rounded-xl justify-center items-center'>
+                    <Text style={{fontSize: hp(2)}} className='text-white font-semibold tracking-wider'>
+                      Delete ALL!!!
+                    </Text>
+                  </TouchableOpacity>
+                )
+              }
+        </View>
+        </View>
         </View>
       </View>
     </CustomKeyboardView>

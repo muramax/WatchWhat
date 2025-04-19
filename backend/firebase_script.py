@@ -26,16 +26,7 @@ def verify_id_token(id_token):
     except Exception as e:
         print("Token verification error:", e)
         return None
-
-def add_movies_series(name, genre, status, token):
-    userId = token['uid']
-    doc_ref = movies_series_collection.document(userId).collection("user_movies_series").document(name)
-    doc_ref.set({
-        "name": name,
-        "genre": genre,
-        "status": status
-    })
-    
+        
 @app.route('/add_movie', methods=['POST'])
 def add_movie():
     data = request.json
@@ -49,8 +40,21 @@ def add_movie():
     if not decoded_token:
         return jsonify({"message": "Invalid or expired ID token"}), 401
 
-    # If token is valid, add the movie
-    add_movies_series(name, genre, status, decoded_token)
+    userId = decoded_token['uid']
+    collection_ref = movies_series_collection.document(userId).collection("user_movies_series")
+
+    # Check if a document with this name already exists
+    existing_doc = collection_ref.document(name).get()
+    if existing_doc.exists:
+        return {"success": False, "message": "Movie/Series name already exists."}
+
+    # Create new document with the name as ID
+    doc_ref = collection_ref.document(name)
+    doc_ref.set({
+        "name": name,
+        "genre": genre,
+        "status": status
+    })
     return jsonify({"message": "Movie added successfully"}), 200
         
 @app.route('/get_all_movies_series', methods=['POST'])
@@ -70,8 +74,8 @@ def get_all_movies_series():
             
     return jsonify({"movies_series": movie_names}), 200
 
-@app.route('/change_movies_series', methods=['POST'])
-def change_movies_series():
+@app.route('/update_movies_series', methods=['PATCH'])
+def update_movies_series():
     data = request.json
     id_token = data.get('id_token')
     name = data.get('nameu')
@@ -95,9 +99,44 @@ def change_movies_series():
     
     userId = decoded_token['uid']
     doc_ref = movies_series_collection.document(userId).collection("user_movies_series").document(name)
-    doc_ref.reference.update(update_fields)
+    doc_ref.update(update_fields)
     return jsonify({"message": "Movie updated successfully"}), 200
 
+@app.route('/delete_movies_series', methods=['DELETE'])
+def delete_movies_series():
+    data = request.json
+    id_token = data.get('id_token')
+    name = data.get('named')
+    
+    print(f"Received data: {data}")
+    decoded_token = verify_id_token(id_token)
+    if not decoded_token:
+        return jsonify({"message": "Invalid or expired ID token"}), 401
+    
+    userId = decoded_token['uid']
+    doc_ref = movies_series_collection.document(userId).collection("user_movies_series").document(name)
+    doc_ref.delete()
+    return jsonify({"message": "Movie deleted successfully"}), 200
+
+@app.route('/delete_all_movies_series', methods=['DELETE'])
+def delete_all_movies_series():
+    data = request.json
+    id_token = data.get('id_token')
+    
+    print(f"Received data: {data}")
+    decoded_token = verify_id_token(id_token)
+    if not decoded_token:
+        return jsonify({"message": "Invalid or expired ID token"}), 401
+    
+    userId = decoded_token['uid']
+    batch = db.batch()
+    
+    doc_ref = movies_series_collection.document(userId).collection("user_movies_series")
+    docs = doc_ref.stream()
+    for doc in docs:
+        batch.delete(doc.reference)
+    batch.commit()
+    return jsonify({"message": "Movie deleted all successfully"}), 200
 
 print("Flask routes:")
 for rule in app.url_map.iter_rules():
@@ -108,5 +147,8 @@ if __name__ == '__main__':
     print(f" * ngrok tunnel \"{public_url}\" -> http://127.0.0.1:5000")
         
     app.run(port=5000)
+    
+
+
     
 
