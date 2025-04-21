@@ -21,9 +21,9 @@ export default function home() {
   const [deletedMoviesSeries, setDeletedMoviesSeries] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [moviesSeries, setMoviesSeries] = useState([]);
-  const NGROK_URL = 'https://721f-34-139-222-174.ngrok-free.app/'; // Replace everytime when run backend
+  const NGROK_URL = 'https://c5e9-34-138-22-51.ngrok-free.app/'; // Replace everytime when run backend
   const genres = [
-    "Action", "Adventure", "Animation", "Comedy", "Drama", "Fantasy", "Horror", 
+    "Action", "Adventure", "Animation", "Anime", "Comedy", "Drama", "Fantasy", "Horror", 
     "Mystery", "Romance", "Sci-Fi", "Thriller", "Crime", "Documentary", "Historical", 
     "Musical", "Family", "Biography", "War", "Western", "Superhero", "Sports", 
     "Reality", "Game Show", "True Crime", "Psychological", "Zombie/Apocalypse"
