@@ -17,6 +17,8 @@ import Loading from "@/components/Loading";
 import CustomKeyboardView from "@/components/CustomKeyboardView";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "@/context/authContext";
+import { NGROK_URL } from "../ngrok_url";
+
 
 export default function whatstatus() {
   const { getIdToken } = useAuth();
@@ -30,7 +32,6 @@ export default function whatstatus() {
   const [watching, setWatching] = useState<Movie[]>([]);
   const [planning, setPlanning] = useState<Movie[]>([]);
   const [completed, setCompleted] = useState<Movie[]>([]);
-  const NGROK_URL = "https://30ab-34-148-151-65.ngrok-free.app/"; // Replace everytime when run backend
 
   const getByStatus = async () => {
     setLoading(true);
