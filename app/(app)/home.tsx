@@ -187,7 +187,7 @@ export default function home() {
       const idToken = await getIdToken();
 
       const response = await fetch(`${NGROK_URL}/update_movies_series`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "ngrok-skip-browser-warning": "true",
           "Content-Type": "application/json",
