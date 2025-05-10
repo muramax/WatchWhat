@@ -318,6 +318,7 @@ export default function home() {
             >
               <MaterialIcons name="movie" size={hp(3)} color="gray" />
               <TextInput
+                value = {selectedName}
                 onChangeText={(value) => setSelectedName(value)}
                 style={{ fontSize: hp(1.8) }}
                 className="ml-4 flex-1 font-semibold text-black"
