@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Foundation, MaterialIcons } from "@expo/vector-icons";
 import Loading from "@/components/Loading";
 import CustomKeyboardView from "@/components/CustomKeyboardView";
 import { Picker } from "@react-native-picker/picker";
@@ -25,7 +25,7 @@ interface MoviesByGenre {
 export default function Genres() {
   const { getIdToken } = useAuth();
   const [loading, setLoading] = useState(false);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [moviesByGenre, setMoviesByGenre] = useState<MoviesByGenre>({});
   const [selectedGenre, setSelectedGenre] = useState<string>("");
 
@@ -61,6 +61,7 @@ export default function Genres() {
       alert("An error occurred while fetching movies");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -87,13 +88,36 @@ export default function Genres() {
         return null;
     }
   }
-  
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getMoviesByGenre();
+  };
 
   return (
     <CustomKeyboardView>
       <StatusBar style="dark" />
+      <ScrollView
+            className="flex bg-#F3F4F6"
+            refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+      >
       <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl">
-        <Text className="text-left text-2xl font-bold text-white">Genres</Text>
+        <Text className="text-left text-2xl font-bold text-white">YourGenre</Text>
+        <TouchableOpacity
+            onPress={onRefresh}
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 20,
+              height: hp(3.5),
+              paddingHorizontal: 10,
+            }}
+            className="bg-indigo-400 rounded-xl justify-center items-center"
+          >
+            <Foundation name="refresh" size={20} color="#FAFAFA" />
+        </TouchableOpacity>
         {loading ? (
           <View className="flex-row justify-center">
             <Loading size={hp(8)} />
@@ -161,6 +185,7 @@ export default function Genres() {
           </>
         )}
       </View>
+      </ScrollView>
     </CustomKeyboardView>
   );
 }

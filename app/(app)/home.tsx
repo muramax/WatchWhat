@@ -304,7 +304,6 @@ export default function home() {
   return (
     <CustomKeyboardView>
       <StatusBar style="dark" />
-
         <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
         <View>
           <Text className="text-left text-2xl font-bold text-white">Add</Text>

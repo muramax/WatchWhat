@@ -13,7 +13,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
-import { Feather, MaterialIcons, Octicons } from "@expo/vector-icons";
+import { Feather, Foundation, MaterialIcons, Octicons } from "@expo/vector-icons";
 import Loading from "@/components/Loading";
 import CustomKeyboardView from "@/components/CustomKeyboardView";
 import { useAuth } from "@/context/authContext";
@@ -284,7 +284,19 @@ export default function WhatStatus() {
         <View style={styles.container}>
           {/* Header */}
           <Text style={styles.header}>WhatStatus</Text>
-
+          <TouchableOpacity
+            onPress={onRefresh}
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 20,
+              height: hp(3.5),
+              paddingHorizontal: 10,
+            }}
+            className="bg-indigo-400 rounded-xl justify-center items-center"
+          >
+            <Foundation name="refresh" size={20} color="#FAFAFA" />
+          </TouchableOpacity>
           {/* Watching Section */}
           <Text style={styles.sectionHeader}>Watching</Text>
           <View style={styles.section}>
@@ -525,12 +537,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6", // bg-gray-100
   },
   container: {
-    marginTop: 24, // mt-6
+    marginTop: 16, // mt-6
     marginHorizontal: 16, // mx-4
-    paddingTop: 24, // pt-6
-    paddingBottom: 32, // pb-8
-    paddingHorizontal: 24, // px-6
-    backgroundColor: "#1E293B", // bg-slate-800
+    paddingTop: 16, // pt-6
+    paddingBottom: 24, // pb-8
+    paddingHorizontal: 20, // px-6
+    backgroundColor: "#334155", // bg-slate-800
     borderRadius: 16, // rounded-2xl
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -552,7 +564,7 @@ const styles = StyleSheet.create({
     marginBottom: 8, // mb-2
   },
   section: {
-    backgroundColor: "#334155", // bg-slate-700
+    backgroundColor: "#475569", // bg-slate-700
     padding: 16, // p-4
     borderRadius: 8, // rounded-lg
   },
