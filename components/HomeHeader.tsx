@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import React from "react";
 import { useAuth } from "@/context/authContext";
 
@@ -9,9 +9,16 @@ export default function HomeHeader() {
   };
 
   return (
-    <View className=" pt-10 px-5 pb-6 bg-indigo-500 rounded-b-3xl shadow">
+    <View
+      className=" pt-10 px-5 pb-6 rounded-b-3xl shadow"
+      style={{ backgroundColor: "#314555" }}
+    >
       <View className="flex-row justify-between items-center">
-        <Text className="font-bold text-3xl text-white">AddWhat?</Text>
+        <Image
+          source={require("../assets/images/cover.png")}
+          style={{ width: 65, height: 65 }}
+          resizeMode="cover"
+        />
         <Text className="font-bold text-2xl text-white text-right">
           {user?.username}
         </Text>

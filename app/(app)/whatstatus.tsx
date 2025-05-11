@@ -13,7 +13,12 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
-import { Feather, Foundation, MaterialIcons, Octicons } from "@expo/vector-icons";
+import {
+  Feather,
+  Foundation,
+  MaterialIcons,
+  Octicons,
+} from "@expo/vector-icons";
 import Loading from "@/components/Loading";
 import CustomKeyboardView from "@/components/CustomKeyboardView";
 import { useAuth } from "@/context/authContext";
@@ -89,7 +94,7 @@ export default function WhatStatus() {
             "ngrok-skip-browser-warning": "true",
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const data = await response.json();
@@ -287,7 +292,7 @@ export default function WhatStatus() {
           <TouchableOpacity
             onPress={onRefresh}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 20,
               right: 20,
               height: hp(3.5),
@@ -327,9 +332,7 @@ export default function WhatStatus() {
                           onPress={() => handleDelete(item.name)}
                           style={[styles.actionButton, styles.confirmButton]}
                         >
-                          <Text style={styles.confirmButtonText}>
-                            Confirm
-                          </Text>
+                          <Text style={styles.confirmButtonText}>Confirm</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={cancelDelete}
@@ -343,7 +346,11 @@ export default function WhatStatus() {
                         onPress={() => initiateDelete(item.name)}
                         style={styles.actionButton}
                       >
-                        <MaterialIcons name="delete" size={20} color="#EF4444" />
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color="#EF4444"
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -382,9 +389,7 @@ export default function WhatStatus() {
                           onPress={() => handleDelete(item.name)}
                           style={[styles.actionButton, styles.confirmButton]}
                         >
-                          <Text style={styles.confirmButtonText}>
-                            Confirm
-                          </Text>
+                          <Text style={styles.confirmButtonText}>Confirm</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={cancelDelete}
@@ -398,7 +403,11 @@ export default function WhatStatus() {
                         onPress={() => initiateDelete(item.name)}
                         style={styles.actionButton}
                       >
-                        <MaterialIcons name="delete" size={20} color="#EF4444" />
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color="#EF4444"
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -437,9 +446,7 @@ export default function WhatStatus() {
                           onPress={() => handleDelete(item.name)}
                           style={[styles.actionButton, styles.confirmButton]}
                         >
-                          <Text style={styles.confirmButtonText}>
-                            Confirm
-                          </Text>
+                          <Text style={styles.confirmButtonText}>Confirm</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={cancelDelete}
@@ -453,7 +460,11 @@ export default function WhatStatus() {
                         onPress={() => initiateDelete(item.name)}
                         style={styles.actionButton}
                       >
-                        <MaterialIcons name="delete" size={20} color="#EF4444" />
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color="#EF4444"
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -473,9 +484,7 @@ export default function WhatStatus() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalHeader}>
-              Update {selectedMovie?.name}
-            </Text>
+            <Text style={styles.modalHeader}>Update {selectedMovie?.name}</Text>
 
             <View style={styles.inputContainer}>
               <MaterialIcons name="style" size={24} color="gray" />
@@ -527,6 +536,11 @@ export default function WhatStatus() {
           </View>
         </View>
       </Modal>
+      <View>
+        <Text className="text-center text-gray-500 text-sm mt-4 mb-4">
+          © 2025 WatchWhat. All rights reserved.
+        </Text>
+      </View>
     </CustomKeyboardView>
   );
 }

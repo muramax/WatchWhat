@@ -36,7 +36,7 @@ export default function _layout() {
           tabBarIcon: ({ color }) => (
             <Octicons name="checklist" size={hp(2.5)} color={color} />
           ),
-          header: () => <StatusHeader />,
+          header: () => <HomeHeader />,
         }}
       />
       <Tabs.Screen
@@ -47,7 +47,7 @@ export default function _layout() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="style" size={hp(3)} color={color} />
           ),
-          header: () => <GenreHeader />,
+          header: () => <HomeHeader />,
         }}
       />
     </Tabs>

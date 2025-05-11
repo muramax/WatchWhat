@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Pressable,
   useWindowDimensions,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -13,7 +15,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
-import { Feather, MaterialIcons, Octicons } from "@expo/vector-icons";
+import { Feather, Foundation, MaterialIcons, Octicons } from "@expo/vector-icons";
 import Loading from "@/components/Loading";
 import CustomKeyboardView from "@/components/CustomKeyboardView";
 import { Picker } from "@react-native-picker/picker";
@@ -23,6 +25,7 @@ import { NGROK_URL } from "../ngrok_url"; // adjust the path if needed
 
 export default function home() {
   const { getIdToken } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedName, setSelectedName] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
@@ -158,6 +161,7 @@ export default function home() {
       console.error("Fetch error:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -301,12 +305,36 @@ export default function home() {
     getAllMoviesSeries();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    getAllMoviesSeries();
+  };
+
   return (
     <CustomKeyboardView>
       <StatusBar style="dark" />
-        <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
+      <ScrollView
+              className="flex bg-#F3F4F6"
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+      >
+      <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
         <View>
           <Text className="text-left text-2xl font-bold text-white">Add</Text>
+          <TouchableOpacity
+            onPress={onRefresh}
+            style={{
+              position: "absolute",
+              top: 1,
+              right: 5,
+              height: hp(3.5),
+              paddingHorizontal: 10,
+            }}
+            className="bg-indigo-400 rounded-xl justify-center items-center"
+          >
+            <Foundation name="refresh" size={20} color="#FAFAFA" />
+          </TouchableOpacity>
         </View>
 
         <View className="gap-5">
@@ -317,7 +345,7 @@ export default function home() {
             >
               <MaterialIcons name="movie" size={hp(3)} color="gray" />
               <TextInput
-                value = {selectedName}
+                value={selectedName}
                 onChangeText={(value) => setSelectedName(value)}
                 style={{ fontSize: hp(1.8) }}
                 className="ml-4 flex-1 font-semibold text-black"
@@ -393,11 +421,13 @@ export default function home() {
             </View>
           </View>
         </View>
-        </View>
+      </View>
 
-        <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
+      <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
         <View>
-          <Text className="text-left text-2xl font-bold text-white">Update</Text>
+          <Text className="text-left text-2xl font-bold text-white">
+            Update
+          </Text>
         </View>
 
         <View className="gap-5">
@@ -418,7 +448,11 @@ export default function home() {
                 }}
                 dropdownIconColor="gray"
               >
-                <Picker.Item label="Select Movie/Series" value="" color="gray" />
+                <Picker.Item
+                  label="Select Movie/Series"
+                  value=""
+                  color="gray"
+                />
                 {moviesSeries.map((ms) => (
                   <Picker.Item key={ms} label={ms} value={ms} />
                 ))}
@@ -492,11 +526,13 @@ export default function home() {
             </View>
           </View>
         </View>
-        </View>
+      </View>
 
-        <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
+      <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-slate-700 rounded-2xl ">
         <View>
-          <Text className="text-left text-2xl font-bold text-white">Delete</Text>
+          <Text className="text-left text-2xl font-bold text-white">
+            Delete
+          </Text>
         </View>
 
         <View className="gap-5">
@@ -517,7 +553,11 @@ export default function home() {
                 }}
                 dropdownIconColor="gray"
               >
-                <Picker.Item label="Select Movie/Series" value="" color="gray" />
+                <Picker.Item
+                  label="Select Movie/Series"
+                  value=""
+                  color="gray"
+                />
                 {moviesSeries.map((ms) => (
                   <Picker.Item key={ms} label={ms} value={ms} />
                 ))}
@@ -546,9 +586,9 @@ export default function home() {
             </View>
           </View>
         </View>
-        </View>
+      </View>
 
-        <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-red-900 rounded-2xl ">
+      <View className="mt-4 mx-4 pt-4 pb-6 px-5 gap-3 bg-red-900 rounded-2xl ">
         <View>
           <Text className="text-left text-2xl font-bold text-white">
             Delete ALL!!!
@@ -600,8 +640,13 @@ export default function home() {
             </View>
           </View>
         </View>
-        </View>
-      
+      </View>
+      <View>
+        <Text className="text-center text-gray-500 text-sm mt-4 mb-4">
+          © 2025 WatchWhat. All rights reserved.
+        </Text>
+      </View>
+    </ScrollView>
     </CustomKeyboardView>
   );
 }

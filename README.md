@@ -15,9 +15,11 @@
    ```
 
    Start web and android
+
    ```bash
     npm run web
    ```
+
    ```bash
     npm run android
    ```
@@ -27,7 +29,7 @@
 1. Create new branch
 
 ```
-git checkout -b <BRANCH_NAME> 
+git checkout -b <BRANCH_NAME>
 ```
 
 2. Make your changes
